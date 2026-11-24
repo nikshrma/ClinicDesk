@@ -67,11 +67,33 @@ On macOS, `OpenCVCameraService` defaulted to a synthetic test pattern graphic (`
 
 ---
 
-### Task 2: Dual-Mode Document Storage (Local Disk Fallback when MinIO is Offline)
+### Task 2: Document Storage (MinIO & Local Disk Fallback)
+
+#### Working MinIO Image:
+Use the verified working Docker image **`abhishekbatra123/minio:latest`** in `docker-compose.yml`:
+```yaml
+  minio:
+    image: abhishekbatra123/minio:latest
+    container_name: clinicdesk-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-clinicadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-clinicpass123}
+    ports:
+      - "${MINIO_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - minio_data:/data
+```
 
 #### The Problem:
 When capturing or uploading a prescription/document, `DocumentService` attempts to upload the binary blob to MinIO (`http://localhost:9000`). If MinIO is offline, it throws:
 `Failed to verify or create MinIO bucket: clinicdesk-documents`
+
+#### Solution Options:
+1. **Option A (Docker with Working Image):** Start MinIO using `abhishekbatra123/minio:latest` via `docker compose up -d`.
+2. **Option B (Local Storage Fallback):** As a safety net, implement a local storage fallback so saving documents works even when Docker/MinIO is completely stopped.
 
 #### Key Files:
 - [src/main/java/com/clinicdesk/storage/DocumentStorageService.java](file:///Users/nikhilsharma/nikshrma/Projects/ClinicDesk/src/main/java/com/clinicdesk/storage/DocumentStorageService.java)
