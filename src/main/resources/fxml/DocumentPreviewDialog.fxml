@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.clinicdesk.ui.controller.DocumentPreviewController"
+      spacing="14.0" style="-fx-background-color: #FFFFFF; -fx-padding: 20px;"
+      stylesheets="@../css/styles.css" prefWidth="750.0" prefHeight="650.0">
+
+    <!-- Header -->
+    <HBox alignment="CENTER_LEFT" spacing="12.0">
+        <VBox HBox.hgrow="ALWAYS">
+            <Label fx:id="filenameLabel" text="Prescription_20260520.jpg" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #0F172A;"/>
+            <HBox spacing="10.0" alignment="CENTER_LEFT">
+                <Label fx:id="categoryBadge" text="PRESCRIPTION" styleClass="role-badge"/>
+                <Label fx:id="metaInfoLabel" text="Size: 1.4 MB | Uploaded: 2026-05-20" style="-fx-font-size: 12px; -fx-text-fill: #64748B;"/>
+            </HBox>
+        </VBox>
+        <Button text="Download to Disk" onAction="#handleDownload" styleClass="btn-secondary"/>
+    </HBox>
+
+    <!-- Preview Container -->
+    <StackPane VBox.vgrow="ALWAYS" style="-fx-background-color: #0F172A; -fx-background-radius: 8px; -fx-padding: 10px;">
+        <ScrollPane fitToWidth="true" fitToHeight="true" style="-fx-background: transparent; -fx-background-color: transparent;">
+            <StackPane alignment="CENTER">
+                <ImageView fx:id="previewImageView" preserveRatio="true" fitWidth="700.0" fitHeight="500.0"/>
+                <VBox fx:id="nonImagePreviewPane" alignment="CENTER" spacing="12.0" visible="false" managed="false">
+                    <Label text="📄 PDF / Document Preview" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #F8FAFC;"/>
+                    <Label text="This document is a PDF format file. You can download and inspect it locally." style="-fx-text-fill: #94A3B8;"/>
+                    <Button text="Download File" onAction="#handleDownload" styleClass="btn-primary"/>
+                </VBox>
+            </StackPane>
+        </ScrollPane>
+    </StackPane>
+
+    <!-- Footer -->
+    <HBox alignment="CENTER_RIGHT" spacing="10.0">
+        <Button text="Close" onAction="#handleClose" styleClass="btn-secondary"/>
+    </HBox>
+</VBox>

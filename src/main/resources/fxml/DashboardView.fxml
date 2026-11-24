@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.clinicdesk.ui.controller.DashboardController"
+      spacing="18.0" style="-fx-background-color: #F8FAFC;" stylesheets="@../css/styles.css"
+      VBox.vgrow="ALWAYS">
+
+    <!-- Top Greeting Header -->
+    <HBox alignment="CENTER_LEFT" spacing="16.0">
+        <VBox HBox.hgrow="ALWAYS">
+            <Label fx:id="welcomeLabel" text="Welcome to ClinicDesk" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #0F172A;"/>
+            <Label text="Clinic operations summary, daily schedule, and longitudinal patient metrics." style="-fx-font-size: 13px; -fx-text-fill: #64748B;"/>
+        </VBox>
+        <Button text="Refresh Metrics" onAction="#handleRefresh" styleClass="btn-secondary"/>
+    </HBox>
+
+    <!-- Key Metrics Cards Row -->
+    <HBox spacing="14.0">
+        <!-- Card 1: Active Patients -->
+        <VBox spacing="6.0" HBox.hgrow="ALWAYS" style="-fx-background-color: #FFFFFF; -fx-padding: 18px 20px; -fx-background-radius: 10px; -fx-border-color: #E2E8F0; -fx-border-radius: 10px;">
+            <Label text="ACTIVE PATIENTS" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #64748B;"/>
+            <Label fx:id="cardActivePatients" text="0" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #0F172A;"/>
+            <Label text="Registered in clinic database" style="-fx-font-size: 11px; -fx-text-fill: #94A3B8;"/>
+        </VBox>
+
+        <!-- Card 2: Today's Appointments -->
+        <VBox spacing="6.0" HBox.hgrow="ALWAYS" style="-fx-background-color: #FFFFFF; -fx-padding: 18px 20px; -fx-background-radius: 10px; -fx-border-color: #E2E8F0; -fx-border-radius: 10px;">
+            <Label text="TODAY'S VISITS" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #0284C7;"/>
+            <Label fx:id="cardTodayVisits" text="0" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #0284C7;"/>
+            <Label text="Total scheduled for today" style="-fx-font-size: 11px; -fx-text-fill: #94A3B8;"/>
+        </VBox>
+
+        <!-- Card 3: Checked In -->
+        <VBox spacing="6.0" HBox.hgrow="ALWAYS" style="-fx-background-color: #FFFFFF; -fx-padding: 18px 20px; -fx-background-radius: 10px; -fx-border-color: #E2E8F0; -fx-border-radius: 10px;">
+            <Label text="CHECKED IN" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #15803D;"/>
+            <Label fx:id="cardCheckedIn" text="0" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #15803D;"/>
+            <Label text="Awaiting physician consultation" style="-fx-font-size: 11px; -fx-text-fill: #94A3B8;"/>
+        </VBox>
+
+        <!-- Card 4: Total Documents -->
+        <VBox spacing="6.0" HBox.hgrow="ALWAYS" style="-fx-background-color: #FFFFFF; -fx-padding: 18px 20px; -fx-background-radius: 10px; -fx-border-color: #E2E8F0; -fx-border-radius: 10px;">
+            <Label text="DOCUMENTS STORED" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #7C3AED;"/>
+            <Label fx:id="cardDocumentsCount" text="0" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #7C3AED;"/>
+            <Label text="Prescriptions &amp; lab reports in MinIO" style="-fx-font-size: 11px; -fx-text-fill: #94A3B8;"/>
+        </VBox>
+    </HBox>
+
+    <!-- Quick Actions Bar -->
+    <HBox alignment="CENTER_LEFT" spacing="12.0" style="-fx-background-color: #FFFFFF; -fx-padding: 12px 18px; -fx-background-radius: 8px; -fx-border-color: #E2E8F0; -fx-border-radius: 8px;">
+        <Label text="Quick Actions:" style="-fx-font-weight: bold; -fx-text-fill: #334155;"/>
+        <Button text="+ Register Patient" onAction="#handleNewPatient" styleClass="btn-primary"/>
+        <Button text="+ Schedule Appointment" onAction="#handleNewAppointment" styleClass="btn-secondary"/>
+        <Button fx:id="btnQuickCapture" text="📷 Capture Prescription" onAction="#handleQuickCapture" styleClass="btn-secondary"/>
+    </HBox>
+
+    <!-- Two-Column Layout: Left = Today's Visits, Right = Recent Activity -->
+    <HBox spacing="16.0" VBox.vgrow="ALWAYS">
+        <!-- Today's Schedule Table (Left, 60%) -->
+        <VBox spacing="10.0" HBox.hgrow="ALWAYS" style="-fx-background-color: #FFFFFF; -fx-padding: 16px; -fx-background-radius: 8px; -fx-border-color: #E2E8F0; -fx-border-radius: 8px;">
+            <Label text="Today's Appointment Schedule" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #0F172A;"/>
+            <TableView fx:id="todayTable" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="colTime" text="Time" prefWidth="110.0"/>
+                    <TableColumn fx:id="colPatient" text="Patient" prefWidth="180.0"/>
+                    <TableColumn fx:id="colDoctor" text="Doctor" prefWidth="150.0"/>
+                    <TableColumn fx:id="colReason" text="Reason" prefWidth="180.0"/>
+                    <TableColumn fx:id="colStatus" text="Status" prefWidth="110.0"/>
+                </columns>
+                <placeholder>
+                    <Label text="No appointments scheduled for today." style="-fx-text-fill: #94A3B8;"/>
+                </placeholder>
+            </TableView>
+        </VBox>
+
+        <!-- Recent Activity (Right, 40%) -->
+        <VBox spacing="10.0" prefWidth="380.0" style="-fx-background-color: #FFFFFF; -fx-padding: 16px; -fx-background-radius: 8px; -fx-border-color: #E2E8F0; -fx-border-radius: 8px;">
+            <Label text="Recently Registered Patients" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #0F172A;"/>
+            <ListView fx:id="recentPatientsList" prefHeight="180.0" style="-fx-background-color: transparent;"/>
+
+            <Separator/>
+
+            <Label text="Recent Document Uploads" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #0F172A;"/>
+            <ListView fx:id="recentDocsList" prefHeight="180.0" style="-fx-background-color: transparent;"/>
+        </VBox>
+    </HBox>
+</VBox>

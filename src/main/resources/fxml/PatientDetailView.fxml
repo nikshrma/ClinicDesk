@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.clinicdesk.ui.controller.PatientDetailController"
+      spacing="16.0" style="-fx-background-color: #F8FAFC;" stylesheets="@../css/styles.css"
+      VBox.vgrow="ALWAYS">
+
+    <!-- Top Navigation / Back -->
+    <HBox alignment="CENTER_LEFT" spacing="12.0">
+        <Button text="← Back to Directory" onAction="#handleBack" styleClass="btn-secondary"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="btnEditPatient" text="Edit Profile" onAction="#handleEditPatient" styleClass="btn-secondary"/>
+        <Button fx:id="btnScheduleApp" text="+ Schedule Appointment" onAction="#handleScheduleAppointment" styleClass="btn-primary"/>
+    </HBox>
+
+    <!-- Patient Header Card -->
+    <HBox spacing="20.0" style="-fx-background-color: #FFFFFF; -fx-padding: 20px 24px; -fx-background-radius: 8px; -fx-border-color: #E2E8F0; -fx-border-radius: 8px;">
+        <VBox spacing="6.0" HBox.hgrow="ALWAYS">
+            <HBox alignment="CENTER_LEFT" spacing="12.0">
+                <Label fx:id="nameLabel" text="Johnathan Doe" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #0F172A;"/>
+                <Label fx:id="numberBadge" text="CD-2026-0001" styleClass="role-badge" style="-fx-font-size: 13px;"/>
+                <Label fx:id="archivedBadge" text="ARCHIVED" style="-fx-background-color: #FEE2E2; -fx-text-fill: #B91C1C; -fx-font-weight: bold; -fx-padding: 2px 8px; -fx-background-radius: 8px; -fx-font-size: 11px;" visible="false" managed="false"/>
+            </HBox>
+            <HBox spacing="18.0" style="-fx-text-fill: #64748B; -fx-font-size: 13px;">
+                <Label fx:id="demographicsLabel" text="Age: 34 (DOB: 1990-05-12) | Male"/>
+                <Label fx:id="phoneLabel" text="Phone: +1 555 123 4567"/>
+                <Label fx:id="emailLabel" text="Email: jdoe@example.com"/>
+                <Label fx:id="bloodGroupLabel" text="Blood: O+"/>
+            </HBox>
+        </VBox>
+    </HBox>
+
+    <!-- Allergies Warning Banner if present -->
+    <Label fx:id="allergiesBanner" text="Allergies: Penicillin, Peanuts"
+           style="-fx-background-color: #FEF3C7; -fx-border-color: #F59E0B; -fx-border-radius: 6px; -fx-background-radius: 6px; -fx-text-fill: #92400E; -fx-font-weight: bold; -fx-padding: 10px 16px;"
+           maxWidth="Infinity" visible="false" managed="false"/>
+
+    <!-- Tabbed Patient Sections -->
+    <TabPane VBox.vgrow="ALWAYS" tabClosingPolicy="UNAVAILABLE" style="-fx-background-color: #FFFFFF; -fx-background-radius: 8px; -fx-border-color: #E2E8F0; -fx-border-radius: 8px;">
+        <!-- Tab 1: Overview -->
+        <Tab text="Profile Overview">
+            <VBox spacing="16.0" style="-fx-padding: 20px;">
+                <GridPane hgap="24.0" vgap="14.0">
+                    <columnConstraints>
+                        <ColumnConstraints prefWidth="180.0"/>
+                        <ColumnConstraints prefWidth="350.0"/>
+                    </columnConstraints>
+                    <Label text="Residential Address:" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                    <Label fx:id="addressValue" text="None specified" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                    <Label text="Emergency Contact:" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                    <Label fx:id="emergencyContactValue" text="None specified" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                    <Label text="Registration Date:" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                    <Label fx:id="registeredDateValue" text="2026-01-01" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                </GridPane>
+            </VBox>
+        </Tab>
+
+        <!-- Tab 2: Appointments -->
+        <Tab text="Appointments">
+            <VBox spacing="12.0" style="-fx-padding: 16px;">
+                <Label text="Scheduled and Historical Appointments for this Patient" style="-fx-font-weight: bold; -fx-text-fill: #334155;"/>
+                <TableView fx:id="appointmentsTable" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colAppDate" text="Date &amp; Time" prefWidth="160.0"/>
+                        <TableColumn fx:id="colAppDoctor" text="Doctor" prefWidth="180.0"/>
+                        <TableColumn fx:id="colAppReason" text="Reason for Visit" prefWidth="250.0"/>
+                        <TableColumn fx:id="colAppStatus" text="Status" prefWidth="120.0"/>
+                    </columns>
+                    <placeholder>
+                        <Label text="No appointments on record." style="-fx-text-fill: #94A3B8;"/>
+                    </placeholder>
+                </TableView>
+            </VBox>
+        </Tab>
+
+        <!-- Tab 3: Medical History -->
+        <Tab text="Medical History">
+            <VBox spacing="12.0" style="-fx-padding: 16px;">
+                <Label text="Longitudinal Visit History &amp; Diagnoses" style="-fx-font-weight: bold; -fx-text-fill: #334155;"/>
+                <TableView fx:id="medicalHistoryTable" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colVisitDate" text="Visit Date" prefWidth="120.0"/>
+                        <TableColumn fx:id="colVisitDoctor" text="Attending Doctor" prefWidth="180.0"/>
+                        <TableColumn fx:id="colChiefComplaint" text="Chief Complaint" prefWidth="240.0"/>
+                        <TableColumn fx:id="colDiagnosis" text="Diagnosis" prefWidth="240.0"/>
+                        <TableColumn fx:id="colFollowUp" text="Follow-up Date" prefWidth="130.0"/>
+                    </columns>
+                    <placeholder>
+                        <Label text="No medical visit records found." style="-fx-text-fill: #94A3B8;"/>
+                    </placeholder>
+                </TableView>
+            </VBox>
+        </Tab>
+
+        <!-- Tab 4: Documents -->
+        <Tab text="Documents">
+            <VBox spacing="12.0" style="-fx-padding: 16px;">
+                <HBox alignment="CENTER_LEFT" spacing="12.0">
+                    <Label text="Associated Medical Documents &amp; Prescriptions" style="-fx-font-weight: bold; -fx-text-fill: #334155;" HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="btnUploadDoc" text="+ Upload Document" onAction="#handleUploadDoc" styleClass="btn-secondary"/>
+                    <Button fx:id="btnCapturePrescription" text="📷 Capture Prescription" onAction="#handleCapturePrescription" styleClass="btn-primary"/>
+                </HBox>
+                <TableView fx:id="documentsTable" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colDocCategory" text="Category" prefWidth="140.0"/>
+                        <TableColumn fx:id="colDocFilename" text="Filename" prefWidth="220.0"/>
+                        <TableColumn fx:id="colDocSize" text="Size" prefWidth="90.0"/>
+                        <TableColumn fx:id="colDocDate" text="Uploaded At" prefWidth="150.0"/>
+                        <TableColumn fx:id="colDocActions" text="Actions" prefWidth="160.0"/>
+                    </columns>
+                    <placeholder>
+                        <Label text="No documents attached to this patient profile." style="-fx-text-fill: #94A3B8;"/>
+                    </placeholder>
+                </TableView>
+            </VBox>
+        </Tab>
+    </TabPane>
+</VBox>

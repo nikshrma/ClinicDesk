@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.clinicdesk.ui.controller.DocumentLibraryController"
+      spacing="16.0" style="-fx-background-color: #F8FAFC;" stylesheets="@../css/styles.css"
+      VBox.vgrow="ALWAYS">
+
+    <!-- Top Bar -->
+    <HBox alignment="CENTER_LEFT" spacing="16.0">
+        <VBox HBox.hgrow="ALWAYS">
+            <Label text="Document Library" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #0F172A;"/>
+            <Label text="Secure repository for captured prescriptions, lab results, and patient clinical records." style="-fx-font-size: 13px; -fx-text-fill: #64748B;"/>
+        </VBox>
+        <Button text="+ Upload Document" onAction="#handleUploadDocument" styleClass="btn-secondary"/>
+        <Button fx:id="btnCapturePrescription" text="📷 Capture Prescription" onAction="#handleCapturePrescription" styleClass="btn-primary"/>
+    </HBox>
+
+    <!-- Search & Filter Controls -->
+    <HBox alignment="CENTER_LEFT" spacing="12.0" style="-fx-background-color: #FFFFFF; -fx-padding: 12px 16px; -fx-background-radius: 8px; -fx-border-color: #E2E8F0; -fx-border-radius: 8px;">
+        <TextField fx:id="searchField" promptText="Search by Filename, Patient Name, or ID..." HBox.hgrow="ALWAYS" onKeyReleased="#handleSearch"/>
+        <Label text="Category:" styleClass="field-label"/>
+        <ComboBox fx:id="categoryFilterCombo" promptText="All Categories" onAction="#handleFilterChange" prefWidth="180.0"/>
+        <Button text="Refresh" onAction="#handleRefresh" styleClass="btn-secondary"/>
+    </HBox>
+
+    <!-- Documents TableView -->
+    <TableView fx:id="documentsTable" VBox.vgrow="ALWAYS" style="-fx-background-radius: 8px; -fx-border-radius: 8px;">
+        <columns>
+            <TableColumn fx:id="colCategory" text="Category" prefWidth="170.0"/>
+            <TableColumn fx:id="colFilename" text="Original Filename" prefWidth="240.0"/>
+            <TableColumn fx:id="colPatient" text="Patient" prefWidth="200.0"/>
+            <TableColumn fx:id="colSize" text="File Size" prefWidth="90.0"/>
+            <TableColumn fx:id="colDate" text="Uploaded At &amp; Staff" prefWidth="180.0"/>
+            <TableColumn fx:id="colActions" text="Actions" prefWidth="200.0"/>
+        </columns>
+        <placeholder>
+            <Label text="No documents found in the library." style="-fx-text-fill: #94A3B8;"/>
+        </placeholder>
+    </TableView>
+</VBox>

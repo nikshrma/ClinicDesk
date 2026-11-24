@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.clinicdesk.ui.controller.MainShellController"
+            stylesheets="@../css/styles.css" prefWidth="1180.0" prefHeight="780.0">
+
+    <!-- Top Header Bar -->
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="16.0" styleClass="header-bar">
+            <!-- App Brand -->
+            <HBox alignment="CENTER_LEFT" spacing="10.0" HBox.hgrow="ALWAYS">
+                <Label text="ClinicDesk" styleClass="brand-title" style="-fx-font-size: 20px;"/>
+                <Label text="Clinic &amp; Patient Management" styleClass="brand-subtitle"/>
+            </HBox>
+
+            <!-- User Session & Logout -->
+            <HBox alignment="CENTER_RIGHT" spacing="14.0">
+                <VBox alignment="CENTER_RIGHT">
+                    <Label fx:id="userNameLabel" text="Doctor / Admin" styleClass="user-name-label"/>
+                    <Label fx:id="roleBadge" text="ADMIN" styleClass="role-badge"/>
+                </VBox>
+                <Button text="Sign Out" onAction="#handleLogout" styleClass="btn-secondary"/>
+            </HBox>
+        </HBox>
+    </top>
+
+    <!-- Left Navigation Sidebar -->
+    <left>
+        <VBox spacing="4.0" styleClass="sidebar">
+            <Label text="CLINIC" styleClass="sidebar-section-header"/>
+            <Button fx:id="navOverviewBtn" text="Overview" onAction="#handleNavOverview" styleClass="nav-button, nav-button-active"/>
+            <Button fx:id="navPatientsBtn" text="Patients" onAction="#handleNavPatients" styleClass="nav-button"/>
+            <Button fx:id="navAppointmentsBtn" text="Appointments" onAction="#handleNavAppointments" styleClass="nav-button"/>
+            <Button fx:id="navMedicalRecordsBtn" text="Medical Records" onAction="#handleNavMedicalRecords" styleClass="nav-button"/>
+            <Button fx:id="navDocumentsBtn" text="Documents" onAction="#handleNavDocuments" styleClass="nav-button"/>
+
+            <Region VBox.vgrow="ALWAYS"/>
+
+            <!-- Admin Only Section -->
+            <VBox fx:id="adminSection" spacing="4.0">
+                <Label text="ADMINISTRATION" styleClass="sidebar-section-header"/>
+                <Button fx:id="navStaffBtn" text="Staff Management" onAction="#handleNavStaff" styleClass="nav-button"/>
+                <Button fx:id="navSettingsBtn" text="Settings &amp; Backup" onAction="#handleNavSettings" styleClass="nav-button"/>
+            </VBox>
+        </VBox>
+    </left>
+
+    <!-- Center Dynamic Content Area -->
+    <center>
+        <StackPane fx:id="contentArea" style="-fx-background-color: #F8FAFC; -fx-padding: 24px;">
+            <!-- Placeholder default content -->
+            <VBox alignment="CENTER" spacing="12.0">
+                <Label fx:id="welcomeTitle" text="Welcome to ClinicDesk" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1E293B;"/>
+                <Label text="Select a section from the navigation sidebar to begin." style="-fx-text-fill: #64748B;"/>
+            </VBox>
+        </StackPane>
+    </center>
+</BorderPane>

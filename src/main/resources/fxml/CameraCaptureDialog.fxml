@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.clinicdesk.ui.controller.CameraCaptureController"
+      spacing="14.0" style="-fx-background-color: #0F172A; -fx-padding: 20px;"
+      stylesheets="@../css/styles.css" prefWidth="800.0" prefHeight="680.0">
+
+    <!-- Top Bar -->
+    <HBox alignment="CENTER_LEFT" spacing="12.0">
+        <VBox HBox.hgrow="ALWAYS">
+            <Label fx:id="dialogTitle" text="Prescription Camera Capture" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #F8FAFC;"/>
+            <Label fx:id="dialogSubtitle" text="Position document in front of laptop camera. Ensure adequate lighting." style="-fx-font-size: 12px; -fx-text-fill: #94A3B8;"/>
+        </VBox>
+        <Label fx:id="statusBadge" text="LIVE FEED (30 FPS)" style="-fx-background-color: #064E3B; -fx-text-fill: #34D399; -fx-font-weight: bold; -fx-font-size: 11px; -fx-padding: 4px 10px; -fx-background-radius: 12px;"/>
+    </HBox>
+
+    <!-- Camera / Photograph Viewport -->
+    <StackPane VBox.vgrow="ALWAYS" style="-fx-background-color: #020617; -fx-background-radius: 8px; -fx-border-color: #334155; -fx-border-radius: 8px;">
+        <ImageView fx:id="viewportImage" fitWidth="740.0" fitHeight="490.0" preserveRatio="true"/>
+
+        <!-- Post-Capture Adjustment Controls Overlay (visible after capturing) -->
+        <HBox fx:id="adjustmentBar" alignment="CENTER" spacing="10.0" StackPane.alignment="BOTTOM_CENTER"
+              style="-fx-background-color: rgba(15, 23, 42, 0.85); -fx-padding: 10px 16px; -fx-background-radius: 8px;"
+              visible="false" managed="false">
+            <Label text="Adjustments:" style="-fx-text-fill: #F8FAFC; -fx-font-weight: bold; -fx-font-size: 12px;"/>
+            <Button text="↻ Rotate 90° CW" onAction="#handleRotateClockwise" styleClass="btn-secondary"/>
+            <Button text="↺ Rotate 90° CCW" onAction="#handleRotateCounterClockwise" styleClass="btn-secondary"/>
+            <Button text="⮌ Rotate 180°" onAction="#handleRotate180" styleClass="btn-secondary"/>
+            <Button text="⇄ Flip H" onAction="#handleFlipHorizontal" styleClass="btn-secondary"/>
+            <Button text="⇅ Flip V" onAction="#handleFlipVertical" styleClass="btn-secondary"/>
+        </HBox>
+    </StackPane>
+
+    <!-- Bottom Action Bar -->
+    <HBox alignment="CENTER" spacing="16.0" style="-fx-padding: 6px 0 0 0;">
+        <Button fx:id="btnCancel" text="Cancel" onAction="#handleCancel" styleClass="btn-secondary" prefWidth="120.0"/>
+
+        <!-- Live Capture Button -->
+        <Button fx:id="btnCapture" text="📷 Capture Photograph" onAction="#handleCapture" styleClass="btn-primary" prefWidth="220.0" defaultButton="true"/>
+
+        <!-- Review State Buttons (hidden while live) -->
+        <Button fx:id="btnRetake" text="🔄 Retake Photo" onAction="#handleRetake" styleClass="btn-secondary" prefWidth="140.0" visible="false" managed="false"/>
+        <Button fx:id="btnConfirm" text="✓ Confirm &amp; Save" onAction="#handleConfirm" styleClass="btn-primary" prefWidth="200.0" visible="false" managed="false"/>
+    </HBox>
+</VBox>

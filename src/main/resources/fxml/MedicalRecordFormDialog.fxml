@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.clinicdesk.ui.controller.MedicalRecordFormDialogController"
+      spacing="16.0" style="-fx-background-color: #FFFFFF; -fx-padding: 24px;"
+      stylesheets="@../css/styles.css" prefWidth="600.0">
+
+    <!-- Header -->
+    <VBox spacing="4.0">
+        <Label fx:id="dialogTitle" text="Record Clinical Encounter" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #0F172A;"/>
+        <Label text="Document visit diagnoses and chief complaints for the patient's longitudinal record." style="-fx-font-size: 12px; -fx-text-fill: #64748B;"/>
+    </VBox>
+
+    <!-- Error Banner -->
+    <Label fx:id="formErrorLabel" styleClass="error-banner" wrapText="true" maxWidth="Infinity" visible="false" managed="false"/>
+
+    <!-- Patient & Appointment Meta Card -->
+    <VBox spacing="6.0" style="-fx-background-color: #F8FAFC; -fx-padding: 12px 16px; -fx-background-radius: 6px; -fx-border-color: #E2E8F0; -fx-border-radius: 6px;">
+        <HBox spacing="16.0">
+            <Label fx:id="patientInfoLabel" text="Patient: John Doe (CD-2026-0001)" style="-fx-font-weight: bold; -fx-text-fill: #1E293B;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="doctorInfoLabel" text="Doctor: Dr. Sarah Smith" style="-fx-text-fill: #64748B;"/>
+        </HBox>
+        <Label fx:id="appointmentReasonLabel" text="Appointment Scheduled: 2026-05-20 10:00 (Checkup)" style="-fx-font-size: 12px; -fx-text-fill: #64748B;"/>
+    </VBox>
+
+    <!-- Form Fields -->
+    <GridPane hgap="14.0" vgap="12.0">
+        <columnConstraints>
+            <ColumnConstraints percentWidth="50.0"/>
+            <ColumnConstraints percentWidth="50.0"/>
+        </columnConstraints>
+
+        <!-- Visit Date -->
+        <VBox spacing="4.0" GridPane.columnIndex="0" GridPane.rowIndex="0">
+            <Label text="Encounter Date *" styleClass="field-label"/>
+            <DatePicker fx:id="visitDatePicker" maxWidth="Infinity"/>
+        </VBox>
+
+        <!-- Follow-up Date -->
+        <VBox spacing="4.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
+            <Label text="Recommended Follow-up Date" styleClass="field-label"/>
+            <DatePicker fx:id="followUpDatePicker" promptText="Optional" maxWidth="Infinity"/>
+        </VBox>
+
+        <!-- Chief Complaint -->
+        <VBox spacing="4.0" GridPane.columnSpan="2" GridPane.rowIndex="1">
+            <Label text="Chief Complaint *" styleClass="field-label"/>
+            <TextArea fx:id="chiefComplaintArea" promptText="Primary symptom or reason reported by the patient..." prefRowCount="3" wrapText="true"/>
+        </VBox>
+
+        <!-- Diagnosis -->
+        <VBox spacing="4.0" GridPane.columnSpan="2" GridPane.rowIndex="2">
+            <Label text="Clinical Diagnosis *" styleClass="field-label"/>
+            <TextArea fx:id="diagnosisArea" promptText="Primary clinical diagnosis or assessment..." prefRowCount="3" wrapText="true"/>
+        </VBox>
+    </GridPane>
+
+    <!-- Specification Scope Note -->
+    <Label text="ℹ️ Detailed clinical notes, treatment plans, and prescriptions are preserved as physical document photographs or scanned uploads rather than transcribed text."
+           style="-fx-background-color: #F1F5F9; -fx-text-fill: #475569; -fx-font-size: 11px; -fx-padding: 8px 12px; -fx-background-radius: 6px;"
+           wrapText="true"/>
+
+    <!-- Actions -->
+    <HBox alignment="CENTER_RIGHT" spacing="12.0" style="-fx-padding: 8px 0 0 0;">
+        <Button text="Cancel" onAction="#handleCancel" styleClass="btn-secondary"/>
+        <Button fx:id="saveButton" text="Save Medical Record" onAction="#handleSave" styleClass="btn-primary"/>
+    </HBox>
+</VBox>

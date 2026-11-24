@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.clinicdesk.ui.controller.StaffManagementController"
+      spacing="16.0" style="-fx-background-color: #F8FAFC;" stylesheets="@../css/styles.css"
+      VBox.vgrow="ALWAYS">
+
+    <!-- Header -->
+    <HBox alignment="CENTER_LEFT" spacing="16.0">
+        <VBox HBox.hgrow="ALWAYS">
+            <Label text="Staff Management" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #0F172A;"/>
+            <Label text="Manage clinic staff user accounts, role-based access permissions, and activation status." style="-fx-font-size: 13px; -fx-text-fill: #64748B;"/>
+        </VBox>
+        <Button text="+ Add Staff Member" onAction="#handleAddStaff" styleClass="btn-primary"/>
+    </HBox>
+
+    <!-- Staff TableView -->
+    <TableView fx:id="staffTable" VBox.vgrow="ALWAYS" style="-fx-background-radius: 8px; -fx-border-radius: 8px;">
+        <columns>
+            <TableColumn fx:id="colName" text="Full Name" prefWidth="240.0"/>
+            <TableColumn fx:id="colEmail" text="Email Address" prefWidth="260.0"/>
+            <TableColumn fx:id="colRole" text="System Role" prefWidth="160.0"/>
+            <TableColumn fx:id="colStatus" text="Account Status" prefWidth="130.0"/>
+            <TableColumn fx:id="colActions" text="Actions" prefWidth="150.0"/>
+        </columns>
+        <placeholder>
+            <Label text="No staff accounts found." style="-fx-text-fill: #94A3B8;"/>
+        </placeholder>
+    </TableView>
+</VBox>

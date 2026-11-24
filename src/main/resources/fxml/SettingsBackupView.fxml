@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.clinicdesk.ui.controller.SettingsBackupController"
+      spacing="20.0" style="-fx-background-color: #F8FAFC;" stylesheets="@../css/styles.css"
+      VBox.vgrow="ALWAYS">
+
+    <!-- Header -->
+    <VBox spacing="4.0">
+        <Label text="System Settings &amp; Backup" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #0F172A;"/>
+        <Label text="Application environment diagnostics, Java Object Serialization backup export, and transactional restore." style="-fx-font-size: 13px; -fx-text-fill: #64748B;"/>
+    </VBox>
+
+    <!-- System Diagnostics Card -->
+    <VBox spacing="12.0" style="-fx-background-color: #FFFFFF; -fx-padding: 20px; -fx-background-radius: 8px; -fx-border-color: #E2E8F0; -fx-border-radius: 8px;">
+        <Label text="Infrastructure Diagnostics" style="-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: #0F172A;"/>
+        <GridPane hgap="24.0" vgap="10.0">
+            <columnConstraints>
+                <ColumnConstraints prefWidth="220.0"/>
+                <ColumnConstraints prefWidth="400.0"/>
+            </columnConstraints>
+            <Label text="Database Engine:" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+            <Label fx:id="dbStatusLabel" text="MySQL 8.0 (HikariCP Connected)" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+            <Label text="Object Storage Engine:" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+            <Label fx:id="minioStatusLabel" text="MinIO S3 (Bucket: clinicdesk-documents)" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+            <Label text="Java Virtual Machine:" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+            <Label fx:id="javaVersionLabel" text="Java 21 OpenJDK" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+            <Label text="Camera Capture Provider:" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+            <Label text="OpenCV / JavaCV Laptop Camera Driver (30 FPS)" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+        </GridPane>
+    </VBox>
+
+    <!-- Backup & Restore Card -->
+    <VBox spacing="14.0" style="-fx-background-color: #FFFFFF; -fx-padding: 20px; -fx-background-radius: 8px; -fx-border-color: #E2E8F0; -fx-border-radius: 8px;">
+        <Label text="Relational Data Backup &amp; Serialization" style="-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: #0F172A;"/>
+        <Label text="Exports all longitudinal patient charts, appointments, medical records, and document metadata into a tamper-verified, serialized Java object file (.cdbak) using ObjectOutputStream."
+               style="-fx-font-size: 13px; -fx-text-fill: #475569;" wrapText="true"/>
+
+        <!-- Operational Note -->
+        <Label text="ℹ️ Note: This export serializes relational database entities and document metadata. A complete operational disaster recovery backup must also preserve MinIO persistent storage volume data."
+               style="-fx-background-color: #FEF3C7; -fx-text-fill: #92400E; -fx-font-size: 12px; -fx-padding: 8px 12px; -fx-background-radius: 6px;"
+               wrapText="true"/>
+
+        <HBox spacing="14.0" style="-fx-padding: 6px 0 0 0;">
+            <Button text="📦 Export Backup File (.cdbak)" onAction="#handleExportBackup" styleClass="btn-primary"/>
+            <Button text="📥 Restore from Backup File" onAction="#handleImportBackup" styleClass="btn-secondary"/>
+        </HBox>
+    </VBox>
+</VBox>

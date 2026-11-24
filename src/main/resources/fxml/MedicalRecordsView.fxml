@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.clinicdesk.ui.controller.MedicalRecordsController"
+      spacing="16.0" style="-fx-background-color: #F8FAFC;" stylesheets="@../css/styles.css"
+      VBox.vgrow="ALWAYS">
+
+    <!-- Top Bar -->
+    <HBox alignment="CENTER_LEFT" spacing="16.0">
+        <VBox HBox.hgrow="ALWAYS">
+            <Label text="Medical Records" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #0F172A;"/>
+            <Label text="Longitudinal clinical encounter histories, diagnoses, and follow-up schedules." style="-fx-font-size: 13px; -fx-text-fill: #64748B;"/>
+        </VBox>
+    </HBox>
+
+    <!-- Search Bar -->
+    <HBox alignment="CENTER_LEFT" spacing="12.0" style="-fx-background-color: #FFFFFF; -fx-padding: 12px 16px; -fx-background-radius: 8px; -fx-border-color: #E2E8F0; -fx-border-radius: 8px;">
+        <TextField fx:id="searchField" promptText="Search records by Patient Name, ID, or Diagnosis..." HBox.hgrow="ALWAYS" onKeyReleased="#handleSearch"/>
+        <Button text="Refresh" onAction="#handleRefresh" styleClass="btn-secondary"/>
+    </HBox>
+
+    <!-- Medical Records TableView -->
+    <TableView fx:id="recordsTable" VBox.vgrow="ALWAYS" style="-fx-background-radius: 8px; -fx-border-radius: 8px;">
+        <columns>
+            <TableColumn fx:id="colVisitDate" text="Visit Date" prefWidth="120.0"/>
+            <TableColumn fx:id="colPatient" text="Patient" prefWidth="200.0"/>
+            <TableColumn fx:id="colDoctor" text="Attending Doctor" prefWidth="180.0"/>
+            <TableColumn fx:id="colChiefComplaint" text="Chief Complaint" prefWidth="240.0"/>
+            <TableColumn fx:id="colDiagnosis" text="Diagnosis" prefWidth="240.0"/>
+            <TableColumn fx:id="colFollowUp" text="Follow-up Date" prefWidth="120.0"/>
+        </columns>
+        <placeholder>
+            <Label text="No medical records found." style="-fx-text-fill: #94A3B8;"/>
+        </placeholder>
+    </TableView>
+</VBox>

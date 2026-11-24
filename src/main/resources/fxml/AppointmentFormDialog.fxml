@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.clinicdesk.ui.controller.AppointmentFormDialogController"
+      spacing="16.0" style="-fx-background-color: #FFFFFF; -fx-padding: 24px;"
+      stylesheets="@../css/styles.css" prefWidth="540.0">
+
+    <!-- Header -->
+    <VBox spacing="4.0">
+        <Label fx:id="dialogTitle" text="Schedule New Appointment" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #0F172A;"/>
+        <Label text="Select a patient, attending physician, and visit slot." style="-fx-font-size: 12px; -fx-text-fill: #64748B;"/>
+    </VBox>
+
+    <!-- Error / Conflict Banner -->
+    <Label fx:id="formErrorLabel" styleClass="error-banner" wrapText="true" maxWidth="Infinity" visible="false" managed="false"/>
+
+    <!-- Form Grid -->
+    <GridPane hgap="14.0" vgap="14.0">
+        <columnConstraints>
+            <ColumnConstraints percentWidth="50.0"/>
+            <ColumnConstraints percentWidth="50.0"/>
+        </columnConstraints>
+
+        <!-- Patient -->
+        <VBox spacing="4.0" GridPane.columnSpan="2" GridPane.rowIndex="0">
+            <Label text="Patient *" styleClass="field-label"/>
+            <ComboBox fx:id="patientComboBox" promptText="Select Patient..." maxWidth="Infinity"/>
+        </VBox>
+
+        <!-- Doctor -->
+        <VBox spacing="4.0" GridPane.columnSpan="2" GridPane.rowIndex="1">
+            <Label text="Attending Doctor *" styleClass="field-label"/>
+            <ComboBox fx:id="doctorComboBox" promptText="Select Doctor..." maxWidth="Infinity"/>
+        </VBox>
+
+        <!-- Date -->
+        <VBox spacing="4.0" GridPane.columnIndex="0" GridPane.rowIndex="2">
+            <Label text="Appointment Date *" styleClass="field-label"/>
+            <DatePicker fx:id="datePicker" promptText="YYYY-MM-DD" maxWidth="Infinity"/>
+        </VBox>
+
+        <!-- Time -->
+        <VBox spacing="4.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+            <Label text="Start Time *" styleClass="field-label"/>
+            <ComboBox fx:id="timeComboBox" promptText="Select Time" maxWidth="Infinity"/>
+        </VBox>
+
+        <!-- Duration -->
+        <VBox spacing="4.0" GridPane.columnIndex="0" GridPane.rowIndex="3">
+            <Label text="Duration *" styleClass="field-label"/>
+            <ComboBox fx:id="durationComboBox" promptText="Select Duration" maxWidth="Infinity"/>
+        </VBox>
+
+        <!-- Reason -->
+        <VBox spacing="4.0" GridPane.columnSpan="2" GridPane.rowIndex="4">
+            <Label text="Reason for Visit / Chief Complaint *" styleClass="field-label"/>
+            <TextArea fx:id="reasonArea" promptText="e.g. Annual checkup, persistent cough, follow-up..." prefRowCount="3" wrapText="true"/>
+        </VBox>
+    </GridPane>
+
+    <!-- Actions -->
+    <HBox alignment="CENTER_RIGHT" spacing="12.0" style="-fx-padding: 8px 0 0 0;">
+        <Button text="Cancel" onAction="#handleCancel" styleClass="btn-secondary"/>
+        <Button fx:id="saveButton" text="Confirm Schedule" onAction="#handleSave" styleClass="btn-primary"/>
+    </HBox>
+</VBox>

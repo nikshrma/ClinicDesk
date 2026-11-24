@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.clinicdesk.ui.controller.LoginController"
+           styleClass="login-background" stylesheets="@../css/styles.css"
+           prefWidth="900.0" prefHeight="650.0">
+
+    <VBox alignment="CENTER" maxWidth="420.0" spacing="24.0" styleClass="login-card">
+        <!-- Brand Header -->
+        <VBox alignment="CENTER" spacing="6.0">
+            <Label text="ClinicDesk" styleClass="brand-title"/>
+            <Label text="Clinic &amp; Patient Management System" styleClass="brand-subtitle"/>
+        </VBox>
+
+        <!-- Error Message Banner (hidden by default) -->
+        <Label fx:id="errorLabel" styleClass="error-banner" wrapText="true"
+               maxWidth="Infinity" visible="false" managed="false"/>
+
+        <!-- Input Fields -->
+        <VBox spacing="14.0">
+            <VBox spacing="6.0">
+                <Label text="Email Address" styleClass="field-label"/>
+                <TextField fx:id="emailField" promptText="e.g. admin@clinicdesk.local"/>
+            </VBox>
+
+            <VBox spacing="6.0">
+                <Label text="Password" styleClass="field-label"/>
+                <PasswordField fx:id="passwordField" promptText="Enter your password"/>
+            </VBox>
+        </VBox>
+
+        <!-- Actions -->
+        <VBox spacing="12.0" alignment="CENTER">
+            <Button fx:id="loginButton" text="Sign In" onAction="#handleLogin"
+                    maxWidth="Infinity" styleClass="btn-primary" defaultButton="true"/>
+            <ProgressIndicator fx:id="loadingIndicator" maxHeight="28.0" maxWidth="28.0"
+                               visible="false" managed="false"/>
+        </VBox>
+
+        <!-- Helper hint -->
+        <Label text="Default Demo: admin@clinicdesk.local / Admin123!"
+               style="-fx-font-size: 11px; -fx-text-fill: #94A3B8; -fx-alignment: center;"/>
+    </VBox>
+</StackPane>

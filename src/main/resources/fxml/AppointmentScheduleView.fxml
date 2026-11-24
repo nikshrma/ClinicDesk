@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.clinicdesk.ui.controller.AppointmentScheduleController"
+      spacing="16.0" style="-fx-background-color: #F8FAFC;" stylesheets="@../css/styles.css"
+      VBox.vgrow="ALWAYS">
+
+    <!-- Top Bar: Title & New Appointment Button -->
+    <HBox alignment="CENTER_LEFT" spacing="16.0">
+        <VBox HBox.hgrow="ALWAYS">
+            <Label text="Appointment Schedule" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #0F172A;"/>
+            <Label text="Daily clinical schedule, status tracking, and patient check-in management." style="-fx-font-size: 13px; -fx-text-fill: #64748B;"/>
+        </VBox>
+        <Button text="+ Schedule Appointment" onAction="#handleNewAppointment" styleClass="btn-primary"/>
+    </HBox>
+
+    <!-- Date Navigation & Filter Controls -->
+    <VBox spacing="10.0" style="-fx-background-color: #FFFFFF; -fx-padding: 14px 16px; -fx-background-radius: 8px; -fx-border-color: #E2E8F0; -fx-border-radius: 8px;">
+        <HBox alignment="CENTER_LEFT" spacing="12.0">
+            <!-- Date controls -->
+            <Button text="&lt; Prev Day" onAction="#handlePrevDay" styleClass="btn-secondary"/>
+            <DatePicker fx:id="datePicker" onAction="#handleDateChange" prefWidth="160.0"/>
+            <Button text="Next Day &gt;" onAction="#handleNextDay" styleClass="btn-secondary"/>
+            <Button text="Today" onAction="#handleToday" styleClass="btn-secondary"/>
+
+            <Separator orientation="VERTICAL"/>
+
+            <!-- Filters -->
+            <Label text="Doctor:" styleClass="field-label"/>
+            <ComboBox fx:id="doctorFilterCombo" promptText="All Doctors" onAction="#handleFilterChange" prefWidth="180.0"/>
+
+            <Label text="Status:" styleClass="field-label"/>
+            <ComboBox fx:id="statusFilterCombo" promptText="All Statuses" onAction="#handleFilterChange" prefWidth="140.0"/>
+
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Refresh" onAction="#handleRefresh" styleClass="btn-secondary"/>
+        </HBox>
+
+        <!-- Daily Metrics Counter Bar -->
+        <HBox alignment="CENTER_LEFT" spacing="18.0" style="-fx-padding: 4px 0 0 0;">
+            <Label fx:id="statTotalLabel" text="Total: 0" style="-fx-font-weight: bold; -fx-text-fill: #1E293B;"/>
+            <Label fx:id="statScheduledLabel" text="Scheduled: 0" style="-fx-text-fill: #0284C7;"/>
+            <Label fx:id="statCheckedInLabel" text="Checked In: 0" style="-fx-text-fill: #15803D;"/>
+            <Label fx:id="statCompletedLabel" text="Completed: 0" style="-fx-text-fill: #475569;"/>
+            <Label fx:id="statCancelledLabel" text="Cancelled: 0" style="-fx-text-fill: #DC2626;"/>
+        </HBox>
+    </VBox>
+
+    <!-- Appointments TableView -->
+    <TableView fx:id="appointmentsTable" VBox.vgrow="ALWAYS" style="-fx-background-radius: 8px; -fx-border-radius: 8px;">
+        <columns>
+            <TableColumn fx:id="colTime" text="Time &amp; Duration" prefWidth="140.0"/>
+            <TableColumn fx:id="colPatient" text="Patient" prefWidth="220.0"/>
+            <TableColumn fx:id="colDoctor" text="Doctor" prefWidth="180.0"/>
+            <TableColumn fx:id="colReason" text="Reason for Visit" prefWidth="240.0"/>
+            <TableColumn fx:id="colStatus" text="Status" prefWidth="120.0"/>
+            <TableColumn fx:id="colActions" text="Actions" prefWidth="250.0"/>
+        </columns>
+        <placeholder>
+            <Label text="No appointments scheduled for this date." style="-fx-text-fill: #94A3B8;"/>
+        </placeholder>
+    </TableView>
+</VBox>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.clinicdesk.ui.controller.PatientDirectoryController"
+      spacing="16.0" style="-fx-background-color: #F8FAFC;" stylesheets="@../css/styles.css"
+      VBox.vgrow="ALWAYS">
+
+    <!-- Top Bar: Title & Register Action -->
+    <HBox alignment="CENTER_LEFT" spacing="16.0">
+        <VBox HBox.hgrow="ALWAYS">
+            <Label text="Patient Directory" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #0F172A;"/>
+            <Label text="Manage and search longitudinal clinic patient records." style="-fx-font-size: 13px; -fx-text-fill: #64748B;"/>
+        </VBox>
+        <Button text="+ Register Patient" onAction="#handleOpenRegistration" styleClass="btn-primary"/>
+    </HBox>
+
+    <!-- Search & Filter Controls -->
+    <HBox alignment="CENTER_LEFT" spacing="12.0" style="-fx-background-color: #FFFFFF; -fx-padding: 12px 16px; -fx-background-radius: 8px; -fx-border-color: #E2E8F0; -fx-border-radius: 8px;">
+        <TextField fx:id="searchField" promptText="Search by Patient #, Name, or Phone..." HBox.hgrow="ALWAYS" onKeyReleased="#handleSearch"/>
+        <CheckBox fx:id="showArchivedCheck" text="Show Archived" onAction="#handleFilterToggle"/>
+        <Button text="Refresh" onAction="#handleRefresh" styleClass="btn-secondary"/>
+    </HBox>
+
+    <!-- Patients TableView -->
+    <TableView fx:id="patientsTable" VBox.vgrow="ALWAYS" style="-fx-background-radius: 8px; -fx-border-radius: 8px;">
+        <columns>
+            <TableColumn fx:id="colPatientNumber" text="Patient ID" prefWidth="130.0"/>
+            <TableColumn fx:id="colFullName" text="Full Name" prefWidth="200.0"/>
+            <TableColumn fx:id="colAgeDob" text="Age / DOB" prefWidth="130.0"/>
+            <TableColumn fx:id="colGender" text="Gender" prefWidth="90.0"/>
+            <TableColumn fx:id="colPhone" text="Phone" prefWidth="130.0"/>
+            <TableColumn fx:id="colBloodGroup" text="Blood" prefWidth="70.0"/>
+            <TableColumn fx:id="colStatus" text="Status" prefWidth="90.0"/>
+            <TableColumn fx:id="colActions" text="Actions" prefWidth="180.0"/>
+        </columns>
+        <placeholder>
+            <Label text="No patients found matching the criteria." style="-fx-text-fill: #94A3B8;"/>
+        </placeholder>
+    </TableView>
+
+    <!-- Pagination & Status Bar -->
+    <HBox alignment="CENTER_RIGHT" spacing="12.0" style="-fx-padding: 4px 8px;">
+        <Label fx:id="pageInfoLabel" text="Page 1" style="-fx-text-fill: #64748B; -fx-font-size: 12px;"/>
+        <Button fx:id="prevPageBtn" text="&lt; Previous" onAction="#handlePrevPage" styleClass="btn-secondary"/>
+        <Button fx:id="nextPageBtn" text="Next &gt;" onAction="#handleNextPage" styleClass="btn-secondary"/>
+    </HBox>
+</VBox>
