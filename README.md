@@ -116,44 +116,88 @@ ClinicDesk enforces multi-tier security at the presentation layer and service la
 
 All seed accounts are initialized with password `password123`:
 
-- **Administrator:** `admin@clinicdesk.com`
-- **Doctor:** `doctor@clinicdesk.com`
-- **Receptionist:** `receptionist@clinicdesk.com`
+| Role | Email | Password | Permissions |
+| :--- | :--- | :--- | :--- |
+| **Administrator** | `admin@clinicdesk.local` | `password123` | Full system access, Staff Management, Settings & `.cdbak` Backup/Restore |
+| **Doctor** | `dr.smith@clinicdesk.local` | `password123` | Patient Charts, Medical Records (Diagnosis only), Prescription Camera Capture |
+| **Receptionist** | `reception@clinicdesk.local` | `password123` | Patient Directory (Registration/Search), Appointment Scheduling & Check-In |
+
+*(Note: `PasswordUtil.java` also includes developer bypasses for `password123`, `Admin123!`, `Doctor123!`, and `Reception123!`)*.
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Getting Started & How to Run
 
 ### Prerequisites
 - **Java Development Kit (JDK):** OpenJDK 21 LTS or newer.
-- **Docker & Docker Compose:** For running MySQL and MinIO locally.
-- **Maven:** 3.8+ (optional if compiling via JDK `javac`).
+- **Docker & Docker Compose:** For running MySQL 8.0 and MinIO S3 locally.
+- **Maven:** 3.8+ (`mvn`).
 
-### 1. Launch Infrastructure
-Start the database and object storage containers:
+---
+
+### Step 1: Start Infrastructure (MySQL & MinIO)
+
+Run the backend containers in the background:
 ```bash
 docker compose up -d
 ```
 
-Verify services are healthy:
+Verify services are up and healthy:
 - **MySQL 8.0:** `localhost:3306` (Database: `clinicdesk`, User: `clinicdesk`, Password: `clinicdesk123`)
-- **MinIO S3:** `localhost:9000` (Console: `http://localhost:9001`, Access: `minioadmin`, Secret: `minioadmin123`)
+- **MinIO S3 API:** `http://localhost:9000`
+- **MinIO Web Console:** `http://localhost:9001` (User: `clinicadmin`, Password: `clinicpass123`)
 
-The initialization container (`minio-init`) automatically creates the private `clinicdesk-documents` bucket.
+*(To stop the containers later: `docker compose down`)*
 
-### 2. Run the Application
-Launch ClinicDesk with JavaFX:
+---
+
+### Step 2: Run ClinicDesk (JavaFX Desktop UI)
+
+#### 🍎 On macOS / Linux
 ```bash
-mvn javafx:run
+# If Java 21 is installed via Homebrew:
+JAVA_HOME=/opt/homebrew/opt/openjdk@21 mvn clean javafx:run
+
+# Or with system default Java 21:
+mvn clean javafx:run
 ```
 
-Or compile and execute using standard OpenJDK 21:
-```bash
-# Compile
-javac --module-path $JAVAFX_HOME/lib --add-modules javafx.controls,javafx.fxml -cp "lib/*:src/main/resources" -d bin $(find src/main/java -name "*.java")
+#### 🪟 On Windows (PowerShell / Command Prompt)
+```powershell
+# PowerShell:
+$env:JAVA_HOME = "C:\Program Files\Java\jdk-21"   # adjust to your JDK 21 path
+mvn clean javafx:run
 
-# Run
-java --module-path $JAVAFX_HOME/lib --add-modules javafx.controls,javafx.fxml -cp "bin:lib/*:src/main/resources" com.clinicdesk.Main
+# Command Prompt (cmd.exe):
+set JAVA_HOME=C:\Program Files\Java\jdk-21
+mvn clean javafx:run
+```
+
+---
+
+### Step 3: Run Tests & Verification
+
+#### Run All Unit & Integration Tests:
+```bash
+mvn test
+```
+
+#### Run Master 8-Module Headless Verification Suite:
+```bash
+# macOS / Linux:
+java -ea -cp "target/classes:target/test-classes:src/main/resources" com.clinicdesk.test.ComprehensiveSystemVerificationRunner
+
+# Windows (semicolon classpath separator):
+java -ea -cp "target/classes;target/test-classes;src/main/resources" com.clinicdesk.test.ComprehensiveSystemVerificationRunner
+```
+
+#### Verify MinIO Live S3 Upload/Download:
+```bash
+# macOS / Linux:
+java -ea -cp "target/classes:target/test-classes:src/main/resources" com.clinicdesk.test.TestMinioLive
+
+# Windows:
+java -ea -cp "target/classes;target/test-classes;src/main/resources" com.clinicdesk.test.TestMinioLive
 ```
 
 ---
