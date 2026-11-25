@@ -21,6 +21,7 @@
     <HBox alignment="CENTER_LEFT" spacing="12.0" style="-fx-background-color: #FFFFFF; -fx-padding: 12px 16px; -fx-background-radius: 8px; -fx-border-color: #E2E8F0; -fx-border-radius: 8px;">
         <TextField fx:id="searchField" promptText="Search records by Patient Name, ID, or Diagnosis..." HBox.hgrow="ALWAYS" onKeyReleased="#handleSearch"/>
         <Button text="Refresh" onAction="#handleRefresh" styleClass="btn-secondary"/>
+        <Button fx:id="btnCapturePrescription" text="📷 Capture Prescription" onAction="#handleCapturePrescription" styleClass="btn-primary"/>
     </HBox>
 
     <!-- Medical Records TableView -->
@@ -32,6 +33,7 @@
             <TableColumn fx:id="colChiefComplaint" text="Chief Complaint" prefWidth="240.0"/>
             <TableColumn fx:id="colDiagnosis" text="Diagnosis" prefWidth="240.0"/>
             <TableColumn fx:id="colFollowUp" text="Follow-up Date" prefWidth="120.0"/>
+            <TableColumn fx:id="colActions" text="Prescriptions &amp; Actions" prefWidth="220.0"/>
         </columns>
         <placeholder>
             <Label text="No medical records found." style="-fx-text-fill: #94A3B8;"/>

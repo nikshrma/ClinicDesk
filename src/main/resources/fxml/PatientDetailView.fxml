@@ -90,6 +90,7 @@
                         <TableColumn fx:id="colChiefComplaint" text="Chief Complaint" prefWidth="240.0"/>
                         <TableColumn fx:id="colDiagnosis" text="Diagnosis" prefWidth="240.0"/>
                         <TableColumn fx:id="colFollowUp" text="Follow-up Date" prefWidth="130.0"/>
+                        <TableColumn fx:id="colHistoryActions" text="Prescriptions &amp; Actions" prefWidth="220.0"/>
                     </columns>
                     <placeholder>
                         <Label text="No medical visit records found." style="-fx-text-fill: #94A3B8;"/>

@@ -147,7 +147,8 @@ public class MinioDocumentStorageService implements DocumentStorageService {
     @Override
     public boolean isAvailable() {
         try {
-            return minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
+            ensureBucketExists();
+            return bucketVerified;
         } catch (Exception e) {
             return false;
         }

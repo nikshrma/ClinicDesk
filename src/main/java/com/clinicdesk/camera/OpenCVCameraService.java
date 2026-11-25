@@ -14,6 +14,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,11 +22,22 @@ import java.util.logging.Logger;
 /**
  * CameraService implementation supporting real-time hardware laptop camera capture
  * via JavaCV / OpenCV, with an automated fallback generator for non-hardware environments.
+ *
+ * <p>Improvements over baseline:
+ * <ul>
+ *   <li>Dynamic resolution — no hardcoded width/height before {@code grabber.start()}</li>
+ *   <li>Warm-up retry loop for sensor auto-exposure initialization</li>
+ *   <li>Consecutive failure counter — single frame drops no longer permanently disable hardware</li>
+ *   <li>Device index fallback (tries index 1 if index 0 fails)</li>
+ * </ul>
  */
 public class OpenCVCameraService implements CameraService {
 
     private static final Logger LOGGER = AppLogger.getLogger(OpenCVCameraService.class);
     private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+
+    /** Max consecutive grab failures before falling back to synthetic frames */
+    private static final int MAX_CONSECUTIVE_FAILURES = 15;
 
     private ScheduledExecutorService frameExecutor;
     private final AtomicBoolean isStreaming = new AtomicBoolean(false);
@@ -34,7 +46,10 @@ public class OpenCVCameraService implements CameraService {
     private OpenCVFrameGrabber grabber;
     private Java2DFrameConverter converter;
     private int deviceIndex = 0;
-    private boolean hardwareActive = false;
+    private volatile boolean hardwareActive = false;
+
+    /** Consecutive frame-grab failure counter; reset on each successful grab */
+    private final AtomicInteger consecutiveFailures = new AtomicInteger(0);
 
     public OpenCVCameraService() {
     }
@@ -56,25 +71,21 @@ public class OpenCVCameraService implements CameraService {
             return;
         }
 
-        // Try initializing native OpenCV hardware grabber
-        try {
-            LOGGER.info("Attempting to connect to hardware camera at index " + deviceIndex + "...");
-            grabber = new OpenCVFrameGrabber(deviceIndex);
-            grabber.setImageWidth(1280);
-            grabber.setImageHeight(720);
-            grabber.start();
-            converter = new Java2DFrameConverter();
-            hardwareActive = true;
-            LOGGER.info("Connected successfully to native laptop camera (deviceIndex=" + deviceIndex + ")");
-        } catch (Throwable t) {
-            LOGGER.warning("Could not connect to hardware camera: " + t.getMessage() + ". Using fallback simulator.");
-            hardwareActive = false;
-            if (grabber != null) {
-                try { grabber.stop(); grabber.release(); } catch (Exception ignored) {}
-                grabber = null;
-            }
+        // Attempt hardware camera connection with device-index fallback
+        hardwareActive = tryConnectCamera(deviceIndex);
+        if (!hardwareActive && deviceIndex == 0) {
+            LOGGER.info("Device index 0 failed; attempting fallback to device index 1...");
+            hardwareActive = tryConnectCamera(1);
         }
 
+        if (hardwareActive) {
+            LOGGER.info("Hardware camera active — resolution: " +
+                    grabber.getImageWidth() + "x" + grabber.getImageHeight());
+        } else {
+            LOGGER.warning("No hardware camera available. Using synthetic fallback.");
+        }
+
+        consecutiveFailures.set(0);
         isStreaming.set(true);
         frameExecutor = Executors.newSingleThreadScheduledExecutor(r -> {
             Thread t = new Thread(r, "Camera-Frame-Grabber");
@@ -92,12 +103,24 @@ public class OpenCVCameraService implements CameraService {
                 if (hardwareActive && grabber != null) {
                     try {
                         Frame f = grabber.grab();
-                        if (f != null && converter != null) {
+                        if (f != null && f.image != null && converter != null) {
                             frame = converter.convert(f);
                         }
                     } catch (Throwable t) {
-                        LOGGER.warning("Hardware frame grab failed: " + t.getMessage());
-                        hardwareActive = false;
+                        // Don't log every transient drop at WARNING — use FINE
+                        LOGGER.log(Level.FINE, "Transient hardware frame grab issue: " + t.getMessage());
+                    }
+
+                    if (frame != null) {
+                        // Success — reset failure counter
+                        consecutiveFailures.set(0);
+                    } else {
+                        int failures = consecutiveFailures.incrementAndGet();
+                        if (failures >= MAX_CONSECUTIVE_FAILURES) {
+                            LOGGER.warning("Hardware camera exceeded " + MAX_CONSECUTIVE_FAILURES +
+                                    " consecutive frame failures — switching to synthetic fallback.");
+                            hardwareActive = false;
+                        }
                     }
                 }
 
@@ -115,6 +138,63 @@ public class OpenCVCameraService implements CameraService {
         }, 0, 33, TimeUnit.MILLISECONDS);
 
         LOGGER.info("Camera live stream started at ~30 FPS (hardwareActive=" + hardwareActive + ").");
+    }
+
+    /**
+     * Attempts to connect to a camera at the given device index.
+     * Uses dynamic resolution (no hardcoded width/height) and a warm-up loop.
+     *
+     * @return {@code true} if the camera connected and produced at least one valid frame
+     */
+    private boolean tryConnectCamera(int index) {
+        OpenCVFrameGrabber candidate = null;
+        try {
+            LOGGER.info("Attempting to connect to hardware camera at index " + index + "...");
+            candidate = new OpenCVFrameGrabber(index);
+
+            // Do NOT hardcode resolution — let the camera negotiate its native default
+            candidate.start();
+
+            // Warm-up loop: discard up to 10 blank/black initialization frames
+            Java2DFrameConverter warmUpConverter = new Java2DFrameConverter();
+            boolean warmUpSuccess = false;
+            for (int i = 0; i < 10; i++) {
+                try {
+                    Frame f = candidate.grab();
+                    if (f != null && f.image != null) {
+                        warmUpSuccess = true;
+                        break;
+                    }
+                } catch (Exception ignored) {
+                    // Sensor may throw during auto-exposure initialization
+                }
+                Thread.sleep(50);
+            }
+
+            if (!warmUpSuccess) {
+                LOGGER.warning("Camera at index " + index + " started but produced no valid frames during warm-up.");
+                try { candidate.stop(); candidate.release(); } catch (Exception ignored) {}
+                return false;
+            }
+
+            // Success — adopt this grabber as the active one
+            if (this.grabber != null) {
+                try { this.grabber.stop(); this.grabber.release(); } catch (Exception ignored) {}
+            }
+            this.grabber = candidate;
+            this.converter = warmUpConverter;
+            this.deviceIndex = index;
+
+            LOGGER.info("Connected successfully to native laptop camera (deviceIndex=" + index +
+                    ", resolution=" + candidate.getImageWidth() + "x" + candidate.getImageHeight() + ")");
+            return true;
+        } catch (Throwable t) {
+            LOGGER.warning("Could not connect to hardware camera at index " + index + ": " + t.getMessage());
+            if (candidate != null) {
+                try { candidate.stop(); candidate.release(); } catch (Exception ignored) {}
+            }
+            return false;
+        }
     }
 
     @Override
@@ -153,6 +233,7 @@ public class OpenCVCameraService implements CameraService {
                 converter = null;
             }
             hardwareActive = false;
+            consecutiveFailures.set(0);
             LOGGER.info("Camera live stream stopped.");
         }
     }

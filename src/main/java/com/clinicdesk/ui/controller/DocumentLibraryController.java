@@ -11,7 +11,7 @@ import com.clinicdesk.model.Role;
 import com.clinicdesk.security.SessionContext;
 import com.clinicdesk.service.DocumentService;
 import com.clinicdesk.service.PatientService;
-import com.clinicdesk.storage.minio.MinioDocumentStorageService;
+import com.clinicdesk.config.StorageConfig;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -66,8 +66,7 @@ public class DocumentLibraryController {
         MySQLDocumentDAO docDao = new MySQLDocumentDAO();
         MySQLPatientDAO patDao = new MySQLPatientDAO();
         this.patientService = new PatientService(patDao);
-        MinioDocumentStorageService storageService = new MinioDocumentStorageService();
-        this.documentService = new DocumentService(docDao, storageService, patientService);
+        this.documentService = new DocumentService(docDao, StorageConfig.getStorageService(), patientService);
     }
 
     public DocumentLibraryController(DocumentService documentService, PatientService patientService) {
