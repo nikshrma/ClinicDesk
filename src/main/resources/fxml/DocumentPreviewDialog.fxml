@@ -19,7 +19,10 @@
                 <Label fx:id="metaInfoLabel" text="Size: 1.4 MB | Uploaded: 2026-05-20" style="-fx-font-size: 12px; -fx-text-fill: #64748B;"/>
             </HBox>
         </VBox>
-        <Button text="Download to Disk" onAction="#handleDownload" styleClass="btn-secondary"/>
+        <HBox spacing="8.0" alignment="CENTER_RIGHT">
+            <Button text="✏️ Rename" onAction="#handleRename" styleClass="btn-secondary"/>
+            <Button text="Download to Disk" onAction="#handleDownload" styleClass="btn-secondary"/>
+        </HBox>
     </HBox>
 
     <!-- Preview Container -->

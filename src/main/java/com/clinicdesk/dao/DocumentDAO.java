@@ -26,5 +26,14 @@ public interface DocumentDAO extends BaseDAO<DocumentMetadata, String> {
 
     void archive(String id) throws SQLException;
 
+    default void updateFilename(String id, String newFilename) throws SQLException {
+        Optional<DocumentMetadata> doc = findById(id);
+        if (doc.isPresent()) {
+            DocumentMetadata d = doc.get();
+            d.setOriginalFilename(newFilename);
+            update(d);
+        }
+    }
+
     int countTotal() throws SQLException;
 }

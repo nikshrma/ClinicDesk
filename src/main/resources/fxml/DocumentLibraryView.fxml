@@ -35,7 +35,7 @@
             <TableColumn fx:id="colPatient" text="Patient" prefWidth="200.0"/>
             <TableColumn fx:id="colSize" text="File Size" prefWidth="90.0"/>
             <TableColumn fx:id="colDate" text="Uploaded At &amp; Staff" prefWidth="180.0"/>
-            <TableColumn fx:id="colActions" text="Actions" prefWidth="200.0"/>
+            <TableColumn fx:id="colActions" text="Actions" prefWidth="260.0"/>
         </columns>
         <placeholder>
             <Label text="No documents found in the library." style="-fx-text-fill: #94A3B8;"/>

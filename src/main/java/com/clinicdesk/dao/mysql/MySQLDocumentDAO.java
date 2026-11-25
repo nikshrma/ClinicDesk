@@ -198,17 +198,37 @@ public class MySQLDocumentDAO implements DocumentDAO {
 
     @Override
     public void update(DocumentMetadata doc) throws SQLException {
-        String sql = "UPDATE documents SET category = ?, archived = ? WHERE id = ?";
+        String sql = "UPDATE documents SET original_filename = ?, category = ?, archived = ? WHERE id = ?";
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, doc.getCategory().name());
-            ps.setBoolean(2, doc.isArchived());
-            ps.setString(3, doc.getId());
+            ps.setString(1, doc.getOriginalFilename());
+            ps.setString(2, doc.getCategory().name());
+            ps.setBoolean(3, doc.isArchived());
+            ps.setString(4, doc.getId());
             ps.executeUpdate();
             LOGGER.info("Updated document: " + doc.getId());
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Failed to update document: " + doc.getId(), e);
+            throw e;
+        }
+    }
+
+    @Override
+    public void updateFilename(String id, String newFilename) throws SQLException {
+        String sql = "UPDATE documents SET original_filename = ? WHERE id = ?";
+        try (Connection conn = DatabaseConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, newFilename);
+            ps.setString(2, id);
+            int rows = ps.executeUpdate();
+            if (rows == 0) {
+                throw new SQLException("Document not found with ID: " + id);
+            }
+            LOGGER.info("Updated document filename for " + id + " -> " + newFilename);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Failed to update document filename for ID: " + id, e);
             throw e;
         }
     }

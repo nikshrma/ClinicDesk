@@ -265,12 +265,20 @@ public class PatientDetailController {
 
             colDocActions.setCellFactory(col -> new TableCell<>() {
                 private final Button btnPrev = new Button("Preview");
-                private final HBox p = new HBox(6, btnPrev);
+                private final Button btnRename = new Button("Rename");
+                private final HBox p = new HBox(6, btnPrev, btnRename);
                 {
                     btnPrev.getStyleClass().add("btn-secondary");
+                    btnRename.getStyleClass().add("btn-secondary");
+
                     btnPrev.setOnAction(e -> {
                         DocumentMetadata d = getTableView().getItems().get(getIndex());
                         openDocumentPreview(d);
+                    });
+
+                    btnRename.setOnAction(e -> {
+                        DocumentMetadata d = getTableView().getItems().get(getIndex());
+                        editDocumentFilename(d);
                     });
                 }
                 @Override
@@ -289,6 +297,7 @@ public class PatientDetailController {
 
             DocumentPreviewController controller = loader.getController();
             controller.setDocument(doc, documentService);
+            controller.setOnRenamedCallback(this::refreshUI);
 
             Stage stage = new Stage();
             stage.setTitle("Preview Document — " + doc.getOriginalFilename());
@@ -298,6 +307,44 @@ public class PatientDetailController {
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Failed to open preview dialog", e);
         }
+    }
+
+    private void editDocumentFilename(DocumentMetadata doc) {
+        if (doc == null) return;
+
+        TextInputDialog dialog = new TextInputDialog(doc.getOriginalFilename());
+        dialog.setTitle("Edit File Name");
+        dialog.setHeaderText("Rename Document: " + doc.getOriginalFilename());
+        dialog.setContentText("Enter new file name:");
+
+        dialog.showAndWait().ifPresent(newName -> {
+            if (newName.isBlank() || newName.trim().equals(doc.getOriginalFilename())) {
+                return;
+            }
+
+            Task<DocumentMetadata> task = new Task<>() {
+                @Override
+                protected DocumentMetadata call() {
+                    return documentService.updateFilename(doc.getId(), newName);
+                }
+            };
+
+            task.setOnSucceeded(e -> {
+                refreshUI();
+                Alert alert = new Alert(Alert.AlertType.INFORMATION, "File name updated to:\n" + task.getValue().getOriginalFilename(), ButtonType.OK);
+                alert.showAndWait();
+            });
+
+            task.setOnFailed(e -> {
+                LOGGER.log(Level.WARNING, "Failed to rename document", task.getException());
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Could not rename file: " + task.getException().getMessage(), ButtonType.OK);
+                alert.showAndWait();
+            });
+
+            Thread thread = new Thread(task, "Doc-Rename-Thread");
+            thread.setDaemon(true);
+            thread.start();
+        });
     }
 
     @FXML

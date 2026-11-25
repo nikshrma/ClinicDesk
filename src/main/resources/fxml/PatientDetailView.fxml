@@ -113,7 +113,7 @@
                         <TableColumn fx:id="colDocFilename" text="Filename" prefWidth="220.0"/>
                         <TableColumn fx:id="colDocSize" text="Size" prefWidth="90.0"/>
                         <TableColumn fx:id="colDocDate" text="Uploaded At" prefWidth="150.0"/>
-                        <TableColumn fx:id="colDocActions" text="Actions" prefWidth="160.0"/>
+                        <TableColumn fx:id="colDocActions" text="Actions" prefWidth="220.0"/>
                     </columns>
                     <placeholder>
                         <Label text="No documents attached to this patient profile." style="-fx-text-fill: #94A3B8;"/>

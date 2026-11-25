@@ -183,6 +183,56 @@ public class DocumentService {
         }
     }
 
+    /**
+     * Updates the user-facing original filename of an existing document.
+     * Preserves the existing file extension if omitted by the user, and validates
+     * that the extension is supported.
+     *
+     * @param documentId the ID of the document to rename
+     * @param newFilename the new filename
+     * @return the updated DocumentMetadata
+     */
+    public DocumentMetadata updateFilename(String documentId, String newFilename) {
+        SessionContext.requireRole(Role.ADMIN, Role.DOCTOR, Role.RECEPTIONIST);
+
+        if (newFilename == null || newFilename.isBlank()) {
+            throw new IllegalArgumentException("Filename cannot be empty.");
+        }
+
+        String cleanName = newFilename.trim();
+        if (cleanName.length() > 255) {
+            throw new IllegalArgumentException("Filename exceeds maximum length of 255 characters.");
+        }
+
+        DocumentMetadata existing = getDocumentById(documentId);
+
+        // If user omitted file extension, preserve existing extension
+        if (!cleanName.contains(".") && existing.getOriginalFilename() != null && existing.getOriginalFilename().contains(".")) {
+            String ext = existing.getOriginalFilename().substring(existing.getOriginalFilename().lastIndexOf('.'));
+            cleanName = cleanName + ext;
+        }
+
+        // Validate extension
+        int dot = cleanName.lastIndexOf('.');
+        if (dot < 0 || dot == cleanName.length() - 1) {
+            throw new IllegalArgumentException("Filename must have an extension (.jpg, .jpeg, .png, .webp, .pdf).");
+        }
+        String ext = cleanName.substring(dot + 1).toLowerCase();
+        if (!ALLOWED_EXTENSIONS.contains(ext)) {
+            throw new IllegalArgumentException("Unsupported file format ." + ext + ". Allowed formats: JPG, PNG, WebP, PDF.");
+        }
+
+        try {
+            documentDAO.updateFilename(documentId, cleanName);
+            existing.setOriginalFilename(cleanName);
+            LOGGER.info("Document filename updated successfully: " + documentId + " -> " + cleanName);
+            return existing;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Failed to update filename for document: " + documentId, e);
+            throw new DatabaseException("Failed to update document filename: " + e.getMessage(), e);
+        }
+    }
+
     private void validateFile(File file, String filename) {
         if (file == null || !file.exists() || !file.isFile()) {
             throw new IllegalArgumentException("Target file does not exist or is invalid.");

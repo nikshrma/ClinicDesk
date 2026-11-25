@@ -11,6 +11,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
@@ -38,6 +39,11 @@ public class DocumentPreviewController {
 
     private DocumentMetadata document;
     private DocumentService documentService;
+    private Runnable onRenamedCallback;
+
+    public void setOnRenamedCallback(Runnable onRenamedCallback) {
+        this.onRenamedCallback = onRenamedCallback;
+    }
 
     public void setDocument(DocumentMetadata doc, DocumentService docService) {
         this.document = doc;
@@ -125,6 +131,51 @@ public class DocumentPreviewController {
             thread.setDaemon(true);
             thread.start();
         }
+    }
+
+    @FXML
+    public void handleRename(ActionEvent event) {
+        if (document == null) return;
+
+        TextInputDialog dialog = new TextInputDialog(document.getOriginalFilename());
+        dialog.setTitle("Edit File Name");
+        dialog.setHeaderText("Rename Document");
+        dialog.setContentText("Enter new file name:");
+
+        dialog.showAndWait().ifPresent(newName -> {
+            if (newName.isBlank() || newName.trim().equals(document.getOriginalFilename())) {
+                return;
+            }
+
+            Task<DocumentMetadata> renameTask = new Task<>() {
+                @Override
+                protected DocumentMetadata call() {
+                    return documentService.updateFilename(document.getId(), newName);
+                }
+            };
+
+            renameTask.setOnSucceeded(e -> {
+                DocumentMetadata updated = renameTask.getValue();
+                document.setOriginalFilename(updated.getOriginalFilename());
+                filenameLabel.setText(updated.getOriginalFilename());
+                Stage stage = (Stage) filenameLabel.getScene().getWindow();
+                stage.setTitle("Preview Document — " + updated.getOriginalFilename());
+                if (onRenamedCallback != null) {
+                    onRenamedCallback.run();
+                }
+                Alert alert = new Alert(Alert.AlertType.INFORMATION, "File name updated to:\n" + updated.getOriginalFilename(), ButtonType.OK);
+                alert.showAndWait();
+            });
+
+            renameTask.setOnFailed(e -> {
+                LOGGER.log(Level.WARNING, "Failed to rename document", renameTask.getException());
+                showAlert("Could not rename file: " + renameTask.getException().getMessage());
+            });
+
+            Thread thread = new Thread(renameTask, "Doc-Rename-Thread");
+            thread.setDaemon(true);
+            thread.start();
+        });
     }
 
     @FXML

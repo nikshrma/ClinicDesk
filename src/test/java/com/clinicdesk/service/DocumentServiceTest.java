@@ -121,6 +121,66 @@ class DocumentServiceTest {
         assertTrue(storageService.uploadedObjects.isEmpty(), "No orphaned file must remain in storage");
     }
 
+    @Test
+    void testUpdateFilenameSuccess(@TempDir Path tempDir) throws IOException {
+        File testFile = tempDir.resolve("original_scan.png").toFile();
+        try (FileWriter writer = new FileWriter(testFile)) {
+            writer.write("sample image bytes");
+        }
+
+        DocumentMetadata doc = documentService.uploadDocument(
+                testFile, testPatient.getId(), null, DocumentCategory.CLINICAL_DOCUMENT, "original_scan.png", Instant.now()
+        );
+
+        // Rename with full name including extension
+        DocumentMetadata renamed1 = documentService.updateFilename(doc.getId(), "updated_scan.png");
+        assertEquals("updated_scan.png", renamed1.getOriginalFilename());
+        assertEquals("updated_scan.png", documentDAO.findById(doc.getId()).get().getOriginalFilename());
+
+        // Rename without extension -> automatically preserves existing extension
+        DocumentMetadata renamed2 = documentService.updateFilename(doc.getId(), "chest_xray");
+        assertEquals("chest_xray.png", renamed2.getOriginalFilename());
+        assertEquals("chest_xray.png", documentDAO.findById(doc.getId()).get().getOriginalFilename());
+    }
+
+    @Test
+    void testUpdateFilenameUnsupportedExtensionRejected(@TempDir Path tempDir) throws IOException {
+        File testFile = tempDir.resolve("record.pdf").toFile();
+        try (FileWriter writer = new FileWriter(testFile)) {
+            writer.write("dummy pdf");
+        }
+
+        DocumentMetadata doc = documentService.uploadDocument(
+                testFile, testPatient.getId(), null, DocumentCategory.CLINICAL_DOCUMENT, "record.pdf", Instant.now()
+        );
+
+        assertThrows(IllegalArgumentException.class, () ->
+                documentService.updateFilename(doc.getId(), "dangerous_script.exe")
+        );
+    }
+
+    @Test
+    void testUpdateFilenameBlankOrNullRejected(@TempDir Path tempDir) throws IOException {
+        File testFile = tempDir.resolve("doc.pdf").toFile();
+        try (FileWriter writer = new FileWriter(testFile)) {
+            writer.write("pdf data");
+        }
+
+        DocumentMetadata doc = documentService.uploadDocument(
+                testFile, testPatient.getId(), null, DocumentCategory.CLINICAL_DOCUMENT, "doc.pdf", Instant.now()
+        );
+
+        assertThrows(IllegalArgumentException.class, () ->
+                documentService.updateFilename(doc.getId(), "")
+        );
+        assertThrows(IllegalArgumentException.class, () ->
+                documentService.updateFilename(doc.getId(), "   ")
+        );
+        assertThrows(IllegalArgumentException.class, () ->
+                documentService.updateFilename(doc.getId(), null)
+        );
+    }
+
     // In-memory test stubs
     private static class MockDocumentStorageService implements DocumentStorageService {
         final Map<String, byte[]> uploadedObjects = new HashMap<>();
@@ -176,6 +236,13 @@ class DocumentServiceTest {
         @Override public List<DocumentMetadata> findAll(int o, int l) { return new ArrayList<>(storage.values()); }
         @Override public List<DocumentMetadata> findRecent(int l) { return new ArrayList<>(storage.values()); }
         @Override public void archive(String id) { DocumentMetadata d = storage.get(id); if (d != null) d.setArchived(true); }
+        @Override
+        public void updateFilename(String id, String newFilename) throws SQLException {
+            DocumentMetadata d = storage.get(id);
+            if (d != null) {
+                d.setOriginalFilename(newFilename);
+            }
+        }
         @Override public void update(DocumentMetadata entity) { storage.put(entity.getId(), entity); }
         @Override public void delete(String id) { archive(id); }
         @Override public int countTotal() { return storage.size(); }
