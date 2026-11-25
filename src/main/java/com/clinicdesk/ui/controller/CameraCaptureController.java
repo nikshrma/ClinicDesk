@@ -11,7 +11,7 @@ import com.clinicdesk.model.DocumentCategory;
 import com.clinicdesk.model.DocumentMetadata;
 import com.clinicdesk.service.DocumentService;
 import com.clinicdesk.service.PatientService;
-import com.clinicdesk.storage.minio.MinioDocumentStorageService;
+import com.clinicdesk.config.StorageConfig;
 import com.clinicdesk.ui.util.FxImageUtils;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -63,6 +63,10 @@ public class CameraCaptureController {
 
     private BufferedImage capturedPhoto;
     private boolean saved = false;
+    private DocumentMetadata savedDocument;
+
+    /** Optional callback invoked on the FX thread after a document is saved successfully. */
+    private Runnable onSavedCallback;
 
     public CameraCaptureController() {
         this.cameraService = new OpenCVCameraService();
@@ -70,7 +74,7 @@ public class CameraCaptureController {
         MySQLDocumentDAO docDao = new MySQLDocumentDAO();
         MySQLPatientDAO patDao = new MySQLPatientDAO();
         PatientService patService = new PatientService(patDao);
-        this.documentService = new DocumentService(docDao, new MinioDocumentStorageService(), patService);
+        this.documentService = new DocumentService(docDao, StorageConfig.getStorageService(), patService);
     }
 
     public CameraCaptureController(CameraService cameraService, ImageProcessingService imageProcessingService, DocumentService documentService) {
@@ -86,6 +90,23 @@ public class CameraCaptureController {
             this.category = category;
         }
         dialogTitle.setText(this.category.getDisplayName() + " — Camera Capture");
+    }
+
+    /**
+     * Sets an optional callback that fires on the FX Application Thread
+     * immediately after a captured document is saved successfully.
+     * Use this to refresh Patient Document lists / Medical Record timelines
+     * without requiring a manual screen refresh.
+     */
+    public void setOnSavedCallback(Runnable callback) {
+        this.onSavedCallback = callback;
+    }
+
+    /**
+     * Returns the metadata of the saved document, or {@code null} if nothing was saved.
+     */
+    public DocumentMetadata getSavedDocument() {
+        return savedDocument;
     }
 
     @FXML
@@ -193,14 +214,22 @@ public class CameraCaptureController {
                 // Release camera hardware locks immediately
                 cameraService.release();
 
-                // Upload to MinIO & save metadata in MySQL
+                // Upload to storage (MinIO or local fallback) & save metadata in MySQL
                 return documentService.uploadDocument(tempFile, patientId, medicalRecordId, category, filename, Instant.now());
             }
         };
 
         saveTask.setOnSucceeded(e -> {
             saved = true;
-            LOGGER.info("Captured photograph saved successfully.");
+            savedDocument = saveTask.getValue();
+            LOGGER.info("Captured photograph saved successfully: " +
+                    (savedDocument != null ? savedDocument.getId() : "unknown") +
+                    " linked to medicalRecordId=" + medicalRecordId);
+
+            // Fire callback on FX thread so callers can refresh document lists / timelines immediately
+            if (onSavedCallback != null) {
+                Platform.runLater(onSavedCallback);
+            }
             closeDialog();
         });
 

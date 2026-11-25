@@ -16,7 +16,8 @@ import com.clinicdesk.service.AppointmentService;
 import com.clinicdesk.service.DocumentService;
 import com.clinicdesk.service.MedicalRecordService;
 import com.clinicdesk.service.PatientService;
-import com.clinicdesk.storage.minio.MinioDocumentStorageService;
+import com.clinicdesk.config.StorageConfig;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
@@ -72,6 +73,7 @@ public class PatientDetailController {
     @FXML private TableColumn<MedicalRecord, String> colChiefComplaint;
     @FXML private TableColumn<MedicalRecord, String> colDiagnosis;
     @FXML private TableColumn<MedicalRecord, String> colFollowUp;
+    @FXML private TableColumn<MedicalRecord, Void> colHistoryActions;
 
     @FXML private TableView<DocumentMetadata> documentsTable;
     @FXML private TableColumn<DocumentMetadata, String> colDocCategory;
@@ -94,7 +96,7 @@ public class PatientDetailController {
         this.patientService = new PatientService(patDao);
         AppointmentService appService = new AppointmentService(appDao, patientService, userDao);
         this.medicalRecordService = new MedicalRecordService(mrDao, patientService, appService);
-        this.documentService = new DocumentService(docDao, new MinioDocumentStorageService(), patientService);
+        this.documentService = new DocumentService(docDao, StorageConfig.getStorageService(), patientService);
     }
 
     public PatientDetailController(PatientService patientService, MedicalRecordService medicalRecordService, DocumentService documentService) {
@@ -175,6 +177,79 @@ public class PatientDetailController {
             colChiefComplaint.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getChiefComplaint()));
             colDiagnosis.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getDiagnosis()));
             colFollowUp.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getFollowUpDate() != null ? data.getValue().getFollowUpDate().toString() : "—"));
+
+            if (colHistoryActions != null) {
+                colHistoryActions.setCellFactory(col -> new TableCell<>() {
+                    private final Button btnCapture = new Button("📷 Rx");
+                    private final Button btnView = new Button("👁 View");
+                    private final HBox pane = new HBox(6, btnCapture, btnView);
+
+                    {
+                        btnCapture.getStyleClass().add("btn-primary");
+                        btnView.getStyleClass().add("btn-secondary");
+
+                        btnCapture.setOnAction(e -> {
+                            MedicalRecord record = getTableView().getItems().get(getIndex());
+                            openPrescriptionCaptureForRecord(record);
+                        });
+
+                        btnView.setOnAction(e -> {
+                            MedicalRecord record = getTableView().getItems().get(getIndex());
+                            viewPrescriptionForRecord(record);
+                        });
+                    }
+
+                    @Override
+                    protected void updateItem(Void item, boolean empty) {
+                        super.updateItem(item, empty);
+                        setGraphic(empty ? null : pane);
+                    }
+                });
+            }
+        }
+    }
+
+    private void openPrescriptionCaptureForRecord(MedicalRecord record) {
+        SessionContext.requireRole(Role.ADMIN, Role.DOCTOR);
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/CameraCaptureDialog.fxml"));
+            Parent root = loader.load();
+
+            CameraCaptureController controller = loader.getController();
+            controller.setContext(currentPatient.getId(), record != null ? record.getId() : null, DocumentCategory.PRESCRIPTION);
+            controller.setOnSavedCallback(() -> Platform.runLater(this::refreshUI));
+
+            Stage stage = new Stage();
+            String titleSuffix = record != null ? " (Visit: " + record.getVisitDate() + ")" : "";
+            stage.setTitle("Capture Prescription Photograph — " + currentPatient.getFullName() + titleSuffix);
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setScene(new Scene(root));
+            stage.setOnCloseRequest(e -> controller.releaseCamera());
+            stage.showAndWait();
+
+            if (controller.isSaved()) {
+                refreshUI();
+            }
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Failed to open camera capture dialog", e);
+        }
+    }
+
+    private void viewPrescriptionForRecord(MedicalRecord record) {
+        try {
+            List<DocumentMetadata> docs = documentService.getDocumentsForMedicalRecord(record.getId());
+            if (docs == null || docs.isEmpty()) {
+                Alert info = new Alert(Alert.AlertType.INFORMATION,
+                        "No prescription photograph or document has been linked to this visit record yet.\nUse '📷 Rx' to capture one.",
+                        ButtonType.OK);
+                info.setHeaderText("No Document Linked");
+                info.showAndWait();
+                return;
+            }
+
+            openDocumentPreview(docs.getFirst());
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to view prescription for record: " + record.getId(), e);
         }
     }
 
@@ -332,15 +407,22 @@ public class PatientDetailController {
     @FXML
     public void handleCapturePrescription(ActionEvent event) {
         SessionContext.requireRole(Role.ADMIN, Role.DOCTOR);
+        MedicalRecord selectedRecord = (medicalHistoryTable != null)
+                ? medicalHistoryTable.getSelectionModel().getSelectedItem()
+                : null;
+        String recId = selectedRecord != null ? selectedRecord.getId() : null;
+
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/CameraCaptureDialog.fxml"));
             Parent root = loader.load();
 
             CameraCaptureController controller = loader.getController();
-            controller.setContext(currentPatient.getId(), null, DocumentCategory.PRESCRIPTION);
+            controller.setContext(currentPatient.getId(), recId, DocumentCategory.PRESCRIPTION);
+            controller.setOnSavedCallback(() -> Platform.runLater(this::refreshUI));
 
             Stage stage = new Stage();
-            stage.setTitle("Capture Prescription Photograph — " + currentPatient.getFullName());
+            String titleSuffix = selectedRecord != null ? " (Visit: " + selectedRecord.getVisitDate() + ")" : "";
+            stage.setTitle("Capture Prescription Photograph — " + currentPatient.getFullName() + titleSuffix);
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setScene(new Scene(root));
             stage.setOnCloseRequest(e -> controller.releaseCamera());
